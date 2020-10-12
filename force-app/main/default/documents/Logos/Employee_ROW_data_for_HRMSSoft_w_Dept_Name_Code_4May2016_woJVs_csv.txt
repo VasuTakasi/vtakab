@@ -1,0 +1,23 @@
+TEXT(Expense_Code__c) +'-'+
+
+IF(
+AND(ISPICKVAL( New_Expense_Type__c ,'Foreign Transaction Fees'),HRMSUS__Employee__r.HRMSUS__Company__r.Is_INC__c),
+'50-080',
+IF(ISPICKVAL( New_Expense_Type__c ,'Foreign Transaction Fees'),
+'00-080',
+IF
+(
+ AND(HRMSUS__Is_Billable__c, HRMSUS__Employee__r.HRMSUS__Company__r.Is_INC__c),
+ TEXT(HRMSUS__Employee__r.HRMSUS__Company__r.Region_Code__c)+'-000',
+IF( AND( HRMSUS__Is_Billable__c, 
+NOT(ISPICKVAL(HRMSUS__Employee__r.HRMSUS__Company__r.Region__c , 'AUS')), NOT(ISPICKVAL(HRMSUS__Employee__r.HRMSUS__Company__r.Region__c , 'UK' ))),
+'10-'+Department__r.Dept__c,
+ TEXT(HRMSUS__Employee__r.HRMSUS__Company__r.Region_Code__c)+'-'+
+ Department__r.Dept__c 
+)
+)
+)
+)
++'-00000000000'
+
+============================================================================

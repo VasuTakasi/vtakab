@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <help><!-- US Standard=us-east-1
+US (Oregon)=us-west-2
+US (N.California)=us-west-1
+EU (Ireland)=eu-west-1 
+EU (Frankfurt)=eu-central-1
+Asia (Singapore)=ap-southeast-1
+Asia (Sydney)=ap-southeast-2
+Asia (Tokyo)=ap-northeast-1
+South America(Sao Paulo)=sa-east-1 --></help>
+    <label><!-- Region --></label>
+    <name>Region__c</name>
+    <picklistValues>
+        <masterLabel>ap-northeast-1</masterLabel>
+        <translation><!-- ap-northeast-1 --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>ap-southeast-1</masterLabel>
+        <translation><!-- ap-southeast-1 --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>ap-southeast-2</masterLabel>
+        <translation><!-- ap-southeast-2 --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>eu-central-1</masterLabel>
+        <translation><!-- eu-central-1 --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>eu-west-1</masterLabel>
+        <translation><!-- eu-west-1 --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>sa-east-1</masterLabel>
+        <translation><!-- sa-east-1 --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>us-east-1</masterLabel>
+        <translation><!-- us-east-1 --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>us-west-1</masterLabel>
+        <translation><!-- us-west-1 --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>us-west-2</masterLabel>
+        <translation><!-- us-west-2 --></translation>
+    </picklistValues>
+</CustomFieldTranslation>

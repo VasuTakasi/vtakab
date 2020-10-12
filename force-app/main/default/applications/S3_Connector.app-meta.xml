@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <defaultLandingTab>standard-home</defaultLandingTab>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <label>S3 Connector</label>
+    <tabs>AWSS3_Bucket__c</tabs>
+    <tabs>AWSS3_Bucket_Connection__c</tabs>
+    <tabs>AWS_IAM_UserCredentials__c</tabs>
+    <tabs>Uploaded_File__c</tabs>
+    <tabs>Document__c</tabs>
+    <tabs>Invoice__c</tabs>
+    <tabs>AWS_Document_Manager</tabs>
+</CustomApplication>

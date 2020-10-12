@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WebLink xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SendSMS</fullName>
+    <availability>online</availability>
+    <displayType>button</displayType>
+    <linkType>javascript</linkType>
+    <masterLabel>Send SMS</masterLabel>
+    <openType>onClickJavaScript</openType>
+    <protected>false</protected>
+    <url>{!REQUIRESCRIPT(&quot;/soap/ajax/30.0/connection.js&quot;)}
+{!REQUIRESCRIPT(&quot;/soap/ajax/30.0/apex.js&quot;)}
+var parentdivelem = document.createElement(&quot;div&quot;); 
+var divelem = document.createElement(&quot;div&quot;);
+var textnode = document.createTextNode(&quot;Enter Message:&quot;);
+//textnode.style.marginTop=&quot;10%&quot;;
+divelem.appendChild(textnode);
+var textinputnode = document.createElement(&quot;textarea&quot;);
+textinputnode.type = &quot;text&quot;;
+textinputnode.style.marginLeft=&quot;50px&quot;;
+textinputnode.style.marginTop=&quot;10%&quot;;
+textinputnode.id = &apos;msgBox&apos;;
+
+divelem.appendChild(textinputnode);
+
+var Okbtn = document.createElement(&quot;button&quot;);
+divelem.appendChild(Okbtn);
+var Okbtntext = document.createTextNode(&quot;Send SMS&quot;);
+Okbtn.style.width=&apos;30%&apos;;
+Okbtn.style.marginLeft=&apos;20%&apos;;
+Okbtn.style.marginTop=&apos;10%&apos;;
+Okbtn.appendChild(Okbtntext); 
+Okbtn.onclick=function fnUpdate(){
+msg = document.getElementById(&apos;msgBox&apos;).value;	
+var res = sforce.apex.execute(&quot;SMSClickatell&quot;,&quot;sendSMS&quot;, {mobileNo:&quot;{!Contact.Phone}&quot;,message:msg}); 
+
+if( res == &apos;OK&apos; ){
+	parentdivelem.style.display = &apos;none&apos;;
+	window.alert(&apos;Message has been sent successfully.&apos;);	
+}
+else window.alert(res);
+} 
+
+var Cancelbtn = document.createElement(&quot;button&quot;);
+divelem.appendChild(Cancelbtn);
+var Cancelbtntext = document.createTextNode(&quot;Cancel&quot;);
+Cancelbtn.style.width=&apos;30%&apos;;
+Cancelbtn.appendChild(Cancelbtntext); 
+Cancelbtn.onclick=function fnUpdate(){
+parentdivelem.style.display = &apos;none&apos;;
+} 
+
+divelem.style.width=&apos;300px&apos;;
+divelem.style.height=&apos;200px&apos;;
+divelem.style.top=&apos;20%&apos;;
+divelem.style.left=&apos;30%&apos;;
+divelem.style.padding=&apos;10px&apos;;
+divelem.style.border=&apos;1px solid #333&apos;;
+divelem.style.position=&apos;absolute&apos;;
+divelem.style.background=&apos;#fff&apos;;
+
+
+parentdivelem.appendChild(divelem);
+parentdivelem.style.width=&apos;100%&apos;;
+parentdivelem.style.height=&apos;1000px&apos;;
+parentdivelem.style.top=&apos;10%&apos;;
+parentdivelem.style.background = &apos;rgba(0,0,0,0.5)&apos;;
+parentdivelem.style.zindex=&apos;2&apos;;
+parentdivelem.style.position=&apos;absolute&apos;;
+document.body.appendChild(parentdivelem);</url>
+</WebLink>
