@@ -1,0 +1,16 @@
+<apex:page controller="DownLoadFileController" >
+<apex:form >
+    <apex:pageBlock title="Download File">
+        <apex:pageBlockSection columns="1">
+            <apex:selectList size="1" value="{!fileName}">
+                <apex:selectOptions value="{!lstUploadedFiles}"></apex:selectOptions>
+            </apex:selectList>
+            <apex:commandLink target="_blank" styleClass="btn" value="Download" action="{!FileeContent}" />
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:form>
+<!--
+  <apex:image value="data:image;base64,{!fileContent }" />
+  <apex:outputLink target="_new" value="/servlet/servlet.FileDownload?file={!attId}">View </apex:outputLink>
+  -->
+</apex:page>

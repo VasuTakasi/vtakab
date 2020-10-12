@@ -1,0 +1,742 @@
+<apex:page >
+	<apex:styleSheet value="{!URLFOR($Resource.s3, 'S3Files/skin.css')}" />
+	<apex:styleSheet value="{!URLFOR($Resource.s3, 'S3Files/tree.css')}" />
+	<apex:styleSheet value="{!URLFOR($Resource.s3, 'S3Files/container.css')}" />
+	<apex:styleSheet value="{!URLFOR($Resource.s3, 'S3Files/resize.css')}" />
+	<apex:styleSheet value="{!URLFOR($Resource.s3, 'S3Files/menu.css')}" />
+	
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/jquery.min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/yahoo-dom-event.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/element-min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/dragdrop-min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/resize-min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/container-min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/animation-min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/treeview-min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/json-min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/progressbar-min.js')}"/>
+	
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/yahoo-min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/event-min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/connection_core-min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/container_core-min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.s3, 'S3Files/menu-min.js')}"/>
+	
+	<script> 
+		var isValid=(function(){
+      var rg1=/^[^\\/:\*\?"<>\|~]+$/; // forbidden characters \ / : * ? " < > | ~
+      var rg2=/^\./; // cannot start with dot (.)
+      var rg4=/^\ /; // cannot start with space ( )
+      var rg3=/^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
+      return function isValid(fname){
+        return rg1.test(fname)&&!rg2.test(fname)&&!rg3.test(fname)&&!rg4.test(fname);
+      }
+    })();
+
+    // Create a namespace for our custom functions
+    YAHOO.namespace("cyangate.com");
+
+    YAHOO.cyangate.com.hideEditPanel = function()
+    {
+        YAHOO.cyangate.com.editPanel.hide();
+    }   
+    
+    YAHOO.cyangate.com.showEditPanel = function()
+    {
+        document.getElementById("editPanel").style.display = "block";
+        YAHOO.cyangate.com.editPanel.show();
+        
+        var descriptionTextBox = document.getElementById('{!$Component.editPanelPB.editPanelForm.editPanelBlockSection.fileDescription}');
+          if(descriptionTextBox)
+          {  
+            if(descriptionTextBox.value.length>0)
+            {
+                  if (!(descriptionTextBox.createTextRange))
+                    {
+                       descriptionTextBox.focus();
+                       descriptionTextBox.setSelectionRange(0, 9999);
+                    }
+                    else 
+                    {
+                       setSelectionRange(descriptionTextBox, 0, 9999);
+                    }
+            }
+            else
+            {
+                    descriptionTextBox.focus(); 
+            }
+        
+         }
+    }
+    
+    YAHOO.cyangate.com.hideRenamePanel = function()
+    {
+        YAHOO.cyangate.com.renamePanel.hide();
+    }   
+    
+    YAHOO.cyangate.com.showRenamePanel = function()
+    {
+        document.getElementById("renamePanel").style.display = "block";
+        YAHOO.cyangate.com.renamePanel.show();
+         var nameTextBox = document.getElementById('{!$Component.renamePanelPB.renameForm.renamePanelPBS.newFileName}');
+        if(nameTextBox)
+        {
+            if (!(nameTextBox.createTextRange))
+                {
+                 nameTextBox.focus();
+                 nameTextBox.setSelectionRange(0, 9999);
+                }
+                else 
+                {
+                  setSelectionRange(nameTextBox, 0, 9999);
+                }
+       
+        }
+    } 
+    
+    YAHOO.cyangate.com.hideSharePanel = function()
+    {
+        YAHOO.cyangate.com.sharePanel.hide();
+        var frame = document.getElementById("shareIframe");
+        var frameDoc;
+        if(frame)
+        {
+            if (frame.contentWindow)
+            {
+                frame.contentWindow.document.innerHTML = '';
+            }
+            else if (frame.contentDocument && frame.contentDocument.document)
+            {
+                
+                frame.contentDocument.document.innerHTML = '';
+            }
+        }
+    }  
+    
+    YAHOO.cyangate.com.showSharePanel = function()
+    {
+        document.getElementById("sharePanel").style.display = "block";
+        YAHOO.cyangate.com.sharePanel.show();
+    }
+    
+    YAHOO.cyangate.com.hideCopyUrlPanel = function()
+    {
+        YAHOO.cyangate.com.copyUrlPanel.hide();
+    }   
+    
+    YAHOO.cyangate.com.showCopyUrlPanel = function()
+    {
+        document.getElementById("copyUrlPanel").style.display = "block";
+        YAHOO.cyangate.com.copyUrlPanel.show();
+    }
+    
+    YAHOO.cyangate.com.hideConfirmDeletePanel = function()
+    {
+        YAHOO.cyangate.com.confirmDeletePanel.hide();
+    }   
+    
+    YAHOO.cyangate.com.showConfirmDeletePanel = function()
+    {
+        document.getElementById("confirmDeletePanel").style.display = "block";
+        YAHOO.cyangate.com.confirmDeletePanel.show();
+    } 
+    
+    YAHOO.cyangate.com.showNewFolderPanel = function()
+    {
+        document.getElementById("newFolderPanel").style.display = "block";
+        YAHOO.cyangate.com.newFolderPanel.show();
+        var folderNameTextBox = document.getElementById('{!$Component.newFolderPanelPB.newFolderForm.newFolderPanelPBS.folderName}');
+        folderNameTextBox.focus(); 
+    } 
+    
+    YAHOO.cyangate.com.hideNewFolderPanel = function()
+    {
+        YAHOO.cyangate.com.newFolderPanel.hide();
+    } 
+    
+    YAHOO.cyangate.com.showUploadPanel = function()
+    {
+        document.getElementById("uploadPanel").style.display = "block";
+        YAHOO.cyangate.com.uploadPanel.show();
+    }  
+    
+    YAHOO.cyangate.com.hideUploadPanel = function()
+    {
+        document.getElementById("uploadPanel").style.display = "none";
+        YAHOO.cyangate.com.uploadPanel.hide();
+        var frame = document.getElementById("uploadIframe");
+        var frameDoc;
+        if(frame)
+        {
+            if (frame.contentWindow)
+            {
+                frame.contentWindow.document.innerHTML = '';
+            }
+            else if (frame.contentDocument && frame.contentDocument.document)
+            {
+                
+                frame.contentDocument.document.innerHTML = '';
+            }
+        }
+    }  
+    
+    YAHOO.cyangate.com.showEmailPanel = function()
+    {
+        document.getElementById("emailPanel").style.display = "block";
+        YAHOO.cyangate.com.emailPanel.show();
+    }  
+    
+    YAHOO.cyangate.com.hideEmailPanel = function()
+    {
+        YAHOO.cyangate.com.emailPanel.hide();
+        var frame = document.getElementById("emailIframe");
+        if(frame)
+        {
+            if (frame.contentWindow)
+            {
+                frame.contentWindow.document.innerHTML = '';
+            }
+            else if (frame.contentDocument && frame.contentDocument.document)
+            {
+                
+                frame.contentDocument.document.innerHTML = '';
+            }
+        }
+    }
+        
+    YAHOO.cyangate.com.hideCutCopyPanel = function()
+    {
+        YAHOO.cyangate.com.cutCopyPanel.hide();
+    } 
+    
+    YAHOO.cyangate.com.showCutCopyPanel = function()
+    {
+        document.getElementById("cutCopyPanel").style.display = "block";
+        YAHOO.cyangate.com.cutCopyPanel.show();
+    }
+    
+    YAHOO.cyangate.com.hideAttachPanel = function()
+    {
+        YAHOO.cyangate.com.attachPanel.hide();
+    } 
+    
+    YAHOO.cyangate.com.showAttachPanel = function()
+    {
+        document.getElementById("attachPanel").style.display = "block";
+        YAHOO.cyangate.com.attachPanel.show();
+    }  
+        
+    function selectText()
+    {
+        var inputElem = document.getElementsByTagName("input");
+        for(var i=0; i<inputElem.length; i++)
+        {
+            if(inputElem[i].id.indexOf("attachmentFileUrl")!=-1)
+            {
+               
+                if (!(inputElem[i].createTextRange))
+                {
+                 inputElem[i].focus();
+                 inputElem[i].setSelectionRange(0, 9999);
+                }
+                else 
+                {
+                  setSelectionRange(inputElem[i], 0, 9999);
+                }
+                
+                return;
+            }
+        }
+    }
+
+        function setSelectionRange(input, selectionStart, selectionEnd)
+        {
+            
+                var range = input.createTextRange();
+                range.collapse(true);
+                range.moveEnd('character', selectionEnd);
+                range.moveStart('character', selectionStart);
+                range.select();
+            
+        }
+
+    // Function called when the DOM is ready to create the dialog,
+    // render the dialog into the document body, add our dialog skin
+    // css to the body tag, and wire up the buttons on our dialog    
+    YAHOO.cyangate.com.init = function()
+    {
+        document.body.className = document.body.className + " yui-skin-sam";
+        
+         YAHOO.cyangate.com.editPanel = new YAHOO.widget.Panel(
+            "editPanel",  // The id of our dialog container
+            { 
+                    width           :   '450px',    
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.35
+                                        } 
+            }
+         );
+         YAHOO.cyangate.com.renamePanel = new YAHOO.widget.Panel(
+            "renamePanel",  // The id of our dialog container
+            { 
+                    width           :   '450px',    
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.35
+                                        } 
+            }
+         );
+         YAHOO.cyangate.com.sharePanel = new YAHOO.widget.Panel(
+            "sharePanel",  // The id of our dialog container
+            { 
+                    width           :   '750px',    
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.35
+                                        } 
+            }
+         );
+         YAHOO.cyangate.com.copyUrlPanel = new YAHOO.widget.Panel(
+            "copyUrlPanel",  // The id of our dialog container
+            { 
+                    width           :   '450px',    
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.35
+                                        } 
+            }
+         );
+         YAHOO.cyangate.com.confirmDeletePanel = new YAHOO.widget.Panel(
+            "confirmDeletePanel",  // The id of our dialog container
+            { 
+                    width           :   '400px',    
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.35
+                                        } 
+            }
+         );
+         YAHOO.cyangate.com.newFolderPanel = new YAHOO.widget.Panel(
+            "newFolderPanel",  // The id of our dialog container
+            { 
+                    width           :   '400px',    
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.35
+                                        } 
+            }
+         );
+         YAHOO.cyangate.com.uploadPanel = new YAHOO.widget.Panel(
+            "uploadPanel",  // The id of our dialog container
+            { 
+                    width           :   '1080px',    
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.25
+                                        } 
+            }
+         );
+         
+         YAHOO.cyangate.com.emailPanel = new YAHOO.widget.Panel(
+            "emailPanel",  // The id of our dialog container
+            { 
+                    width           :   '750px',
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   true,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.25
+                                        } 
+            }
+         );
+                  
+         YAHOO.cyangate.com.cutCopyPanel = new YAHOO.widget.Panel(
+            "cutCopyPanel",  // The id of our dialog container
+            { 
+                    width           :   '500px',    
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.25
+                                        } 
+            }
+         );
+         
+         YAHOO.cyangate.com.attachPanel = new YAHOO.widget.Panel(
+            "attachPanel",  // The id of our dialog container
+            { 
+                    width           :   '500px',    
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   40,     // Make sure it's on top of everything
+                    
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.25
+                                        } 
+            }
+         );
+        
+        // Render the dialog to the document.body level of the DOM
+        YAHOO.cyangate.com.editPanel.render(document.body);
+        YAHOO.cyangate.com.renamePanel.render(document.body);
+        YAHOO.cyangate.com.sharePanel.render(document.body);
+        YAHOO.cyangate.com.copyUrlPanel.render(document.body);
+        YAHOO.cyangate.com.confirmDeletePanel.render(document.body);
+        YAHOO.cyangate.com.newFolderPanel.render(document.body);
+        YAHOO.cyangate.com.uploadPanel.render(document.body);
+        YAHOO.cyangate.com.emailPanel.render(document.body);
+        YAHOO.cyangate.com.cutCopyPanel.render(document.body);
+        YAHOO.cyangate.com.attachPanel.render(document.body);
+    }
+    
+    var itemMenus = new Array();
+    function resetFileItems()
+    {
+        for (var i= 0 ; i < itemMenus.length; i++)
+        {
+            itemMenus[i].destroy();
+        }
+        itemMenus = new Array();
+    }
+    function showItemMenu(button)
+    {
+        
+        var menuDiv = "basicmenu_" + button.id.split('_')[1];
+        
+        var basicmenu = YAHOO.util.Dom.get(menuDiv);
+        
+        for (var i= 0 ; i < itemMenus.length; i++)
+        {
+            if (itemMenus[i].srcElement.id == menuDiv)
+            {
+                itemMenus[i].hide();
+                itemMenus[i].show();
+                return;
+            }
+        }
+        
+        YAHOO.cyangate.com.oMenu = new YAHOO.widget.Menu(basicmenu, 
+                { context:[button.id,"tr","br", ["beforeShow", "windowResize"]] });
+        itemMenus.push(YAHOO.cyangate.com.oMenu);
+        YAHOO.cyangate.com.oMenu.render("itemMenusDiv");  
+        YAHOO.cyangate.com.oMenu.show();
+        
+    }
+    
+
+    // Add the init method to the window.load event
+    YAHOO.util.Event.addListener(window, "load", YAHOO.cyangate.com.init);
+     (function() {
+            var Dom = YAHOO.util.Dom,
+                Event = YAHOO.util.Event,
+                col1 = null,
+                col2 = null;
+        
+            Event.onDOMReady(function() {
+                col1 = Dom.get('foldersColumn');
+                col2 = Dom.get('filesColumn');
+                var resize = new YAHOO.util.Resize('foldersColumn', {
+                    handles: ['r']
+                });
+                resize.on('resize', function(ev) {
+                    var size = parseInt(Dom.getStyle('sdriveContent', 'width'), 10);
+                    var w = ev.width;
+                    Dom.setStyle(col1, 'height', '');
+                    Dom.setStyle(col2, 'width', (size - w - 6) + 'px');
+                });
+            });
+
+        })();
+</script>
+<style>
+.fewerMore { display: none;}
+</style>
+	<div id="downloadArea" style="display:none"></div>
+<apex:outputPanel layout="block" id="openArea" style="display: none">
+     <script>
+        var openFilePopupWarning =
+        {
+            init : function()
+            {   
+                if(this.popups_are_disabled() == true)
+                {           
+                    this.alert_to_disable_popup_blocker();
+                }
+            },
+    
+            alert_to_disable_popup_blocker : function()
+            {
+                var handleOK = function()
+                {
+                    this.hide();
+                };
+                
+                YAHOO.cyangate.com.errorDialog = 
+                    new YAHOO.widget.SimpleDialog("errorDialog", 
+                         { width: "300px",
+                           fixedcenter: true,
+                           visible: true,
+                           modal: true,
+                           draggable: true,
+                           close: false,
+                           hideaftersubmit: true,
+                           zIndex: 100,
+                           text: "You have popup blocker enabled. Please disable popup blocker and try again!",
+                           icon: YAHOO.widget.SimpleDialog.ICON_WARN,
+                           constraintoviewport: true,
+                           buttons: [{text:"OK", handler:handleOK, isDefault:true }]
+                         } );
+                YAHOO.cyangate.com.errorDialog.render(document.body);
+                YAHOO.cyangate.com.errorDialog.show();
+            },
+    
+            popups_are_disabled : function()
+            {           
+                    var popup = window.open("text.com", "openFileWindow", "width=640,height=640");
+                
+                    if(!popup || popup.closed || typeof popup == "undefined" || typeof popup.closed == "undefined")
+                    {
+                        return true;
+                    }
+                    popup.focus();     
+        
+
+                    if(navigator && (navigator.userAgent.toLowerCase()).indexOf("chrome") > -1)
+                    {           
+                        var on_load_test = function(){popupWarning.test_chrome_popups(popup);};     
+                        var timer = setTimeout(on_load_test, 1000);
+                        return;  
+                    }
+            },
+    
+            test_chrome_popups : function(popup)
+            {
+                if(popup && popup.screenX != 0)
+                {           
+                    return true;
+                }
+                
+                this.alert_to_disable_popup_blocker();
+            }
+      };
+     </script>
+ </apex:outputPanel>
+ <script>
+     var popup = null;
+     var uploadPopupWindow = null;
+ </script>
+ <apex:outputPanel id="initUploadManager">
+ <div id="uploadPanel" style="display: none" width="100%">
+    <div class="hd">
+        <apex:outputText value="Upload" />
+    </div>  
+    <div class="bd">
+    <apex:outputPanel id="uploadPanelPB">
+             <script>
+             var uploadUrl = 'eeeee'; 
+             var uploadAsPopup = true; 
+             var checkTimer;
+            
+             function displayUpload()
+             {
+                 if (uploadAsPopup)
+                 {
+                     uploadPopupWarning.init();
+                 }
+                 else
+                 {
+                     YAHOO.cyangate.com.showUploadPanel();
+                 }
+                 
+             }
+             
+             function uploadCompleted()
+             {
+                reloadFolderItems();
+                YAHOO.cyangate.com.hideUploadPanel();
+             }
+             </script>
+                    
+             <apex:outputPanel id="uploadPopupScripts" >
+             <script> 
+                 var uploadPopupWarning =
+                 {
+                    init : function()
+                    {   
+                        if(!uploadPopupWindow  || uploadPopupWindow.closed || typeof uploadPopupWindow == "undefined" || typeof uploadPopupWindow.closed == "undefined")
+                        {            
+                            if(this.popups_are_disabled() == true)
+                            {           
+                                this.alert_to_disable_popup_blocker();
+                            }
+                        }
+                        else
+                        {
+                            uploadPopupWindow.focus();
+                        }
+             
+                    },
+            
+                    alert_to_disable_popup_blocker : function()
+                    {
+                        //alert("You have popup blocker enabled. Please disable popup blocker and try again!");
+                        var handleOK = function()
+                        {
+                            this.hide();
+                        };
+                        
+                        YAHOO.cyangate.com.errorDialog = 
+                            new YAHOO.widget.SimpleDialog("errorDialog", 
+                                 { width: "300px",
+                                   fixedcenter: true,
+                                   visible: true,
+                                   modal: true,
+                                   draggable: true,
+                                   close: false,
+                                   hideaftersubmit: true,
+                                   zIndex: 100,
+                                   text: "You have popup blocker enabled. Please disable popup blocker and try again!",
+                                   icon: YAHOO.widget.SimpleDialog.ICON_WARN,
+                                   constraintoviewport: true,
+                                   buttons: [{text:"OK", handler:handleOK, isDefault:true }]
+                                 } );
+                        YAHOO.cyangate.com.errorDialog.render(document.body);
+                        YAHOO.cyangate.com.errorDialog.show();
+                    },
+            
+                    popups_are_disabled : function()
+                    {
+                        uploadPopupWindow = window.open(uploadUrl,'Upload','resizable=yes,width=1050,height=550, top=10, left=10');
+                        checkTimer = setInterval(checkWindowExists,500);
+                                                                        
+                        if(!uploadPopupWindow || uploadPopupWindow.closed || typeof uploadPopupWindow == "undefined" || typeof uploadPopupWindow.closed == "undefined")
+                        {
+                            return true;
+                        }
+                        
+                        uploadPopupWindow.focus();
+                            
+                        //
+                        // Chrome popup detection requires that the popup validates itself - so we need to give
+                        // the popup time to load, then call js on the popup itself
+                        //
+                        if(navigator && (navigator.userAgent.toLowerCase()).indexOf("chrome") > -1)
+                        {           
+                            var on_load_test = function(){uploadPopupWarning.test_chrome_popups(uploadPopupWindow);};     
+                            var timer = setTimeout(on_load_test, 1000);
+                            return;  
+                        }
+                    },
+            
+                    test_chrome_popups: function(uploadPopupWindow)
+                    {
+                        if(uploadPopupWindow && uploadPopupWindow.screenX != 0)
+                        {   
+                            return true;
+                        }
+                        
+                        //
+                        // If the popup js fails - popups are blocked
+                        //
+                        this.alert_to_disable_popup_blocker();
+                    }
+                  };
+                 
+                 function checkWindowExists()
+                 {
+                     if(uploadPopupWindow == null || uploadPopupWindow == undefined || uploadPopupWindow.closed)
+                     {
+                         clearInterval(checkTimer);
+                         reloadFolderItems();
+                     }
+                 }
+                     
+             </script>
+            </apex:outputPanel>
+               
+<!--         <apex:iframe id="uploadIframe" rendered="{!uploadUrl != null && NOT(uploadAsPopup)}" src="{!uploadUrl}" width="100%" height="550px"/> -->
+      
+        </apex:outputPanel>
+    </div>  
+</div>
+</apex:outputPanel>
+ <apex:form >
+ 	<apex:commandButton id="uploadButton" title="Upload File(s)" value="Upload" reRender="uploadPanelPB" 
+ 		onComplete="displayUpload();" status="processStatus" />
+ </apex:form>
+</apex:page>

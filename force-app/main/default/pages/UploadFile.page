@@ -1,0 +1,10 @@
+<apex:page controller="UploadFileController">
+    <apex:form >
+      <apex:pageMessages ></apex:pageMessages>
+      <apex:pageBlock title="Upload File">
+          <apex:inputFile id="resume" value="{!objAttachment.body}" filename="{!objAttachment.Name}" 
+                        title="Attach File" contentType="{!objAttachment.ContentType}" size="45"  />
+          <apex:commandButton value="Upload" action="{!uploadFile}"/>              
+      </apex:pageBlock>
+  </apex:form>
+</apex:page>

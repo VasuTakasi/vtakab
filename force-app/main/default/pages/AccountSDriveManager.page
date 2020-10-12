@@ -1,0 +1,593 @@
+<apex:page standardController="Account" extensions="AccountSDriveManagerController">
+     <style>
+    	body
+    	{
+    		font-family:monospace !important;
+    		font-size: 100%;
+    	}
+        #mainContent {
+          width: 640px;
+          float: left;
+          margin-left: 330px;
+          overflow: hidden;
+          padding-top: 155px;
+          
+          padding: 20px;
+          border: 10px solid #e0e3e5;
+          border-radius: 10px;
+          -moz-border-radius: 10px;
+          -webkit-box-shadow: 0 0 10px #ccc;
+          -moz-box-shadow: 0 0 10px #ccc;
+          box-shadow: 0 0 10px #ccc;
+          background-image: -moz-linear-gradient(top, #ffffff, #f2f2f2);
+          background-image: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f2f2f2));
+          font-family:monospace;
+          font-size: 100%;
+        }
+        
+        h4.fileToUpload {
+          margin-top: 0.0em;
+          font-size: 16pt;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+          color: #7F3300;
+          margin-top: 1.5em;
+          margin-bottom: 0.3em;
+          /*font-family: DaxCompact-RegularRegular, Georgia, Helvetica, Times, 'Times New Roman' , serif;*/
+          font-family:monospace;
+          font-size: 100%;
+        }
+        .row {
+          padding-bottom: 5px;
+        }
+     input, textarea {
+          border: 1px solid #ccc;
+          font-size: 16px;
+          padding: 5px 10px 5px 10px;
+          border-radius: 10px;
+          -moz-border-radius: 10px;
+          -webkit-transition: all 0.5s ease-in-out;
+          -moz-transition: all 0.5s ease-in-out;
+          transition: all 0.5s ease-in-out;
+        }
+        
+     input[type=submit],.submitBtn{
+          opacity: 1.0;
+          background-image: -moz-linear-gradient(top, #ffffff, #dfdfdf);
+          background-image: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#dfdfdf));
+          cursor: pointer;
+          font-size: 100%;
+          font-family:monospace;
+        }
+        
+        .docTbl thead tr th {
+            background: #e0e3e5 !important;
+            border: 1px solid #cecdcd;
+            color: #fff;
+            /*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+            font-family:monospace;
+            font-weight:normal;
+            padding:10px !important;
+        	background: linear-gradient(#fff, #e0e3e5, #fff) !important;
+        	font-size: 100% !important;
+        }
+        
+        .headerCls
+        {
+        	background: #e0e3e5 !important;
+            border: 1px solid #cecdcd;
+            color: #fff;
+            /*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+            font-weight:normal;
+            padding:10px !important;
+        	background: linear-gradient(#fff, #e0e3e5, #fff) !important;
+        	font-size: 105% !important;
+        	font-family:monospace;
+        	font-size: 100%;
+        }
+        /*
+        .docTbl thead tr:nth-child(2) th {
+            padding:5px 10px;
+            background: #e0e3e5;
+            background: linear-gradient(#84d3fa, #3aa7dc);
+            border: 1px solid #6ecdfb;
+            color: #fff;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-weight:normal;
+            text-align:center;
+        }
+        */
+        .docTbl thead tr:nth-child(2) th span {
+            color:#000;
+        }
+        .docTbl tbody tr:nth-child(odd) td {
+            padding:10px 10px;
+            background: #f3f3f3;
+            border: 0px solid #d0d0d0;
+            /*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+            font-family:monospace;
+            font-weight:normal;
+            color:#000;
+            font-size: 100%;
+        }
+        .docTbl tbody tr:nth-child(even) td {
+            padding:10px 10px;
+            background: #fff;
+            border: 0px solid #d0d0d0;
+            /*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+            font-weight:normal;
+            color:#000;
+            width:40px;
+            font-family:monospace;
+            font-size: 100%;
+        }
+        
+        .selectCls
+        {
+        	padding:2px 5px;
+            border-radius:10px;
+            background: #fff;
+            background: linear-gradient(#fff, #e0e3e5, #fff);
+            border:1px solid #ccc;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-weight:normal;
+            color:#000;
+            outline:none;
+            font-family:monospace;
+            font-size: 100%;
+        }
+        
+        .grey_overlay {
+             position: absolute;
+             top: 0%;
+             left: 0%;
+             width: 100%;
+             height: 100%;
+             z-index:2;
+             /*background: rgba(7,111,191,.1)*/
+             background: #000000;
+             /*opacity : 0.5;*/
+        }
+        
+        .lookupIcon
+        {
+        	cursor : pointer !important;
+        }
+    </style>
+    <!--<apex:sectionHeader title="AWS Document Manager" />-->
+    <div style="padding:0 10% 10% 10%">
+    <div style="padding:10px;">
+        <h1 style="font-size:250%; color:#000;"> AWS Document Manager </h1>
+    </div>    
+    <apex:includeScript value="{!$Resource.jQuery}" />
+    <apex:includeScript value="{!$Resource.ClipboardJS}" />
+  <apex:form id="theForm">  
+  	<apex:pageMessages />
+    <script>
+    	var fileName = '{!$Currentpage.parameters.key}';
+         var mode = '{!$Currentpage.parameters.mode}';
+     		 if( fileName && mode != 'stop')
+     		 {
+     		 	var description = localStorage.description; 
+     		 	var size = localStorage.size;
+     		 	var type = localStorage.type;
+     		 	AccountSDriveManagerController.createNewDocument(fileName,type,
+                 description,size, '{!$Currentpage.parameters.id}',
+                 function(result,event)
+			       {
+	                    if (event.status) {
+	                      window.location.href = window.location.href+'&mode=stop';
+	                    } else if (event.type === 'exception') {
+	                    	console.log(event);
+	                        alert('Something wrong happened' );
+	                    } else {
+	                       alert('Something wrong happened' );
+	                    } 
+			 	})
+          	}
+         function performAction(thisObj, fileName, docId)
+         {
+         	var selectVal = thisObj.value;
+         	
+       		if( selectVal == 'Download' )
+       		{
+       			downloadFile( fileName );
+       		}
+         	else if( selectVal == 'Copy URL' )
+         	{
+         		copyFileURL(fileName,'true');
+         	}
+         	else if( selectVal == 'Edit' )
+         	{
+         		editDocument(docId);
+         	}
+         	else if( selectVal == 'Delete' )
+         	{
+         		if( confirm('Are you sure?') )
+         		{
+         			deleteObject(fileName);
+         		}
+         	}
+         	thisObj.value = '';
+         } 		 
+         
+         function redirectToDownload(urlString)
+         {
+         	window.open(urlString,'_blank');
+             //window.location.href = window.location.href; 
+         }
+         
+        function selectURL() 
+		{ 
+			var urlBox  = document.getElementById('urlBox');
+			if( urlBox )
+		    	urlBox.setSelectionRange(0, urlBox.value.length)
+		}
+    </script>
+    	<apex:actionfunction name="downloadFile" action="{!downloadFile}" oncomplete="redirectToDownload('{!urlString}');">
+            <apex:param value="" name="fileName" assignTo="{!fileName}" />
+        </apex:actionfunction>
+        
+        <apex:actionfunction name="copyFileURL" action="{!downloadFile}" reRender="theForm">
+        	 <apex:param value="" name="fileName" assignTo="{!fileName}" />
+            <apex:param value="true" name="copyURL" assignTo="{!isCopyURL}"/>
+        </apex:actionfunction>
+        
+        <apex:actionfunction name="editDocument" action="{!editDocument}" reRender="theForm">
+        	 <apex:param value="" name="recordId" assignTo="{!recordId}" />
+        </apex:actionfunction>
+        
+        <apex:actionfunction name="deleteObject" action="{!deleteObject}" reRender="theForm">
+        	 <apex:param value="" name="fileName" assignTo="{!fileName}" />
+        </apex:actionfunction>
+        
+        <apex:pageBlock id="thePB" mode="maindetail">
+            <center>
+                <div style="background:#FFF;padding:5px;">
+                    <apex:commandButton value="Upload Documnet" action="{!uploadDocument}" 
+                    	style="color:#000;padding:7px;font-size:100%;font-family: monospace;" />
+                    	
+                    <apex:commandButton value="Email" style="color:#000;font-family: monospace;padding:7px;font-size:100%;"
+                     reRender="theForm" action="{!composeMail}">
+                    	<apex:param value="true" name="isEmail" assignTo="{!isEmail}" />
+                    </apex:commandButton>	
+                    <apex:commandButton value="Back To Account" rendered="{!$CurrentPage.Parameters.id <> null}"
+                    	style="color:#000;font-family: monospace;padding:7px;font-size:100%;" 
+                    	action="{!URLFOR('/'+$Currentpage.Parameters.id)}"  />
+                </div>
+            </center>
+            <apex:pageBlockTable value="{!AWSDocuments}" var="doc" styleClass="docTbl">
+            	<apex:column headerValue="Select">
+            		<apex:inputCheckBox value="{!doc.Checked}"/>
+            	</apex:column>
+                <apex:column headerValue="Action">
+                	<apex:selectlist size="1" onchange="performAction(this,'{!doc.objDoc.Document_Name__c}', '{!doc.objDoc.Id}');" styleClass="selectCls">
+                		<apex:selectOption itemValue="" itemLabel="--Item Actions--" />
+                		<apex:selectOption itemValue="Download" itemLabel="Download" />
+                		<apex:selectOption itemValue="Copy URL" itemLabel="Copy URL" />
+                		<!--<apex:selectOption itemValue="Open" itemLabel="Open" />-->
+                		<apex:selectOption itemValue="Edit" itemLabel="Edit" />
+                		<apex:selectOption itemValue="Delete" itemLabel="Delete" />
+                	</apex:selectlist>
+                	<!-- 
+                    <apex:commandLink value="Download" action="{!downloadFile}" rerender="theForm" target="_blank">
+                        <apex:param value="{!doc.objDoc.Document_Name__c}" name="fileName" assignTo="{!fileName}" />
+                    </apex:commandLink>
+                   --> 
+                </apex:column>
+                <apex:column value="{!doc.objDoc.Document_Name__c}" />
+                <apex:column headerValue="Size" value="{!doc.objDoc.Size__c}"/>
+                <apex:column headerValue="Type" value="{!doc.objDoc.Application__c}"/>
+                <apex:column headerValue="Description" value="{!doc.objDoc.Description__c}"/>
+            </apex:pageBlockTable>
+         </apex:pageBlock>
+         <apex:actionFunction name="cancelUpload" action="{!cancelUpload}" />
+<!-- |||| Copy URL Block ||| -->         
+         <apex:outputPanel id="uploadPnl" rendered="{!isCopyURL}" styleClass="grey_overlay">
+         	<center>
+	         	<table class="docTbl" style="width:35%;margin-top:15%;font-family: monospace;">
+	         		<thead>
+		         		<tr>
+		         			<th style="color:#000000;font-size: 130% !important;">
+		         				<b>Copy URL</b>
+		         			</th>
+		         		</tr>
+		         	</thead>	
+	         		<tr>	
+	         			<td style="text-align:center;">
+	         				<input type="text" id="urlBox" value="{!urlString}" style="width:90%;" />
+	         			</td>
+	         		</tr>
+	         		<tr>
+	         			<td style="text-align:right;">
+	         				<!-- <apex:commandButton value="Select URL" style="color:#0000FF;padding:7px;font-size:105%;"
+	         				 onclick="selectURL();return false;" />
+	         				 -->
+	         				<input type="button" class="btn" data-clipboard-action="copy" value="Copy"
+	         				data-clipboard-target="#urlBox" style="color:#000;padding:7px;font-size:100%;font-family: monospace;" />
+	         				
+	         				<apex:commandButton value="Close" reRender="theForm"
+	         				style="color:#000;padding:7px;font-size:100%;font-family: monospace;">
+	         					<apex:param value="false" name="copyURL" assignTo="{!isCopyURL}"/>
+	         				</apex:commandButton>
+	         			</td>
+	         		</tr>
+	         	</table>
+         	</center>
+         	 <script>
+			    var clipboard = new Clipboard('.btn');
+			
+			    clipboard.on('success', function(e) {
+			        console.log(e);
+			    });
+			
+			    clipboard.on('error', function(e) {
+			        console.log(e);
+			    });
+		    </script>
+         </apex:outputPanel>
+<!-- |||| End of Copy URL BLock |||| -->
+
+<!-- |||| Edit Block |||| -->
+	<apex:outputPanel id="editPnl" rendered="{!isEdit}" styleClass="grey_overlay">
+		<center>
+		<table class="docTbl" style="width:35%;margin-top:15%;">
+			<thead>
+				<tr>
+					<th colspan="2" style="color:#000000;font-size: 130% !important;"> 
+						<b>Edit</b> <label style="font-size:90%">{!objDocument.Document_Name__c}</label> 
+					</th>
+				</tr>	
+			</thead>
+				<tr>
+					<td style="text-align:right;">
+						<b> Description </b>
+					</td>
+					<td>
+						<apex:inputField value="{!objDocument.Description__c}" style="width:90%;height:60px;"/>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2" style="text-align:right;">
+						<apex:commandButton value="Save" action="{!updateDocument}" reRender="theForm"
+							style="color:#000;padding:7px;font-size:100%;font-family: monospace;"/>
+							
+						<apex:commandButton value="Cancel" style="color:#000;padding:7px;font-size:100%;font-family: monospace;" reRender="theForm">
+							<apex:param value="false" name="edit" assignTo="{!isEdit}" />
+						</apex:commandButton>
+					</td>
+				</tr>
+		</table>
+		</center>
+	</apex:outputPanel>
+<!-- |||| End of Edit Block |||| -->   
+
+<!-- |||| send email block |||| -->
+	<apex:outputPanel id="sendMailPnl" rendered="{!isEmail}" styleClass="grey_overlay">
+		<div>
+			<center>
+				<table class="docTbl" cellspacing="0" style="width:60%;margin-top:5%;font-family: monospace;">
+					<thead>
+						<tr>
+							<th style="color:#000000;font-size: 130% !important;width:40%;"> <b>Email Documents</b> </th>
+							<th style="color:#000000;font-size: 130% !important;text-align:right;width:60%;"> 
+								<apex:commandlink value="X" reRender="theForm">
+									<apex:param value="false" name="isEmail" assignTo="{!isEmail}" />
+								</apex:commandlink>
+							</th>
+						</tr>
+					</thead>
+						<tr>
+							<td colspan="2">
+								<apex:PageMessages />
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align:right;padding-right:2px;font-weight:bold;">
+								To
+							</td>
+							<td>
+								<apex:inputText id="toBlock" value="{!toAddress}"/> 
+								<img src="/s.gif" alt="Pick an Email form Contacts" class="lookupIcon" onblur="this.className = 'lookupIcon';" 
+									onfocus="this.className = 'lookupIconOn';" onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';" 
+									onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';" 
+									onclick="boxTypeSelection('to','{!$component.toBlock}');"
+									title="Pick an Email form Contacts" style="cursor : pointer;"/>
+							</td>
+						</tr>
+						<!-- 
+						<tr>
+							<td style="text-align:right;padding-right:2px;font-weight:bold;">
+								Additional To
+							</td>
+							<td>
+								<apex:inputTextArea rows="1" style="width:90%"/>
+								<img src="/s.gif" alt="Pick an Email form Contacts" class="lookupIcon" onblur="this.className = 'lookupIcon';" 
+									onfocus="this.className = 'lookupIconOn';" onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';" 
+									onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';" 
+									title="Pick an Email form Contacts" />
+							</td>
+						</tr>
+						-->
+						<tr>
+							<td style="text-align:right;padding-right:2px;font-weight:bold;">
+								CC
+							</td>
+							<td>
+								<apex:inputTextArea rows="1" style="width:80%" id="ccBlock" value="{!ccAddress}"/>
+								<img src="/s.gif" alt="Pick an Email form Contacts" class="lookupIcon" onblur="this.className = 'lookupIcon';" 
+									onfocus="this.className = 'lookupIconOn';" onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';" 
+									onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';" 
+									onclick="boxTypeSelection('cc','{!$component.ccBlock}');"
+									title="Pick an Email form Contacts" style="cursor : pointer;"/>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align:right;padding-right:2px;font-weight:bold;">
+								BCC
+							</td>
+							<td>
+								<apex:inputTextArea rows="1" style="width:80%" id="bccBlock" value="{!bccAddress}"/>
+								<img src="/s.gif" alt="Pick an Email form Contacts" class="lookupIcon" onblur="this.className = 'lookupIcon';" 
+									onfocus="this.className = 'lookupIconOn';" onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';" 
+									onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';" 
+									onclick="boxTypeSelection('cc','{!$component.bccBlock}');"
+									title="Pick an Email form Contacts" style="cursor : pointer;"/>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align:right;padding-right:2px;font-weight:bold;">
+								Subject
+							</td>
+							<td>
+								<apex:inputText style="width:90%" value="{!subject}"/>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align:right;padding-right:2px;font-weight:bold;">
+								Body
+							</td>
+							<td>
+								<apex:inputTextArea rows="10" style="width:90%" value="{!emailBody}"/>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align:right;padding-right:2px;font-weight:bold;">
+								<b>Attachments</b>
+							</td>
+							<td>
+								<apex:repeat value="{!selectedDocs}" var="doc">
+									{!doc.Document_Name__c}<br/> 
+								</apex:repeat>	
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2" style="text-align:right;">
+								<apex:commandButton value="Send" style="color:#000;padding:7px;font-size:100%;font-family: monospace;" 
+								action="{!sendEmail}"/>
+								<apex:commandButton value="Cancel" style="color:#000;padding:7px;font-size:100%;font-family: monospace;"
+								 reRender="theForm">
+									<apex:param value="false" name="isEmail" assignTo="{!isEmail}" />
+								</apex:commandButton>
+							</td>
+						</tr>
+				</table>
+			</center>
+		</div>	
+		<script>
+			var boxType = '';
+			var boxId = '';
+			function copyMailId(mailId)
+			{
+				var boxObj = document.getElementById(boxId);
+				var val = boxObj.value;
+				if( val.indexOf(mailId) < 0)
+					boxObj.value = (val?val:'')+mailId+',';
+				document.getElementById('emailBlock').style.display = 'none';	
+			}
+			
+			function boxTypeSelection(thisType,thisBoxId)
+			{
+				boxType = thisType;
+				boxId = thisBoxId;
+				document.getElementById('emailBlock').style.display = '';	
+			}
+		</script>
+	</apex:outputPanel>
+	<apex:outputPanel rendered="{!isEmail}" layout="none">
+		<div style="position:absolute;z-index:10;background:#000000;width:100%;height:100%;display:none;top:8%;" 
+					 id="emailBlock">
+			<div style="width:50%;"> 	 
+				<apex:pageBlock mode="maindetail">
+					<div class="headerCls" style="text-align:right;">
+						<span style="cursor:pointer;font-size:150%;" onclick="document.getElementById('emailBlock').style.display = 'none';">
+							<b>X</b>
+						</span>
+					</div>
+					<apex:pageBlockTable value="{!contacts}" var="con">
+						<apex:column value="{!con.Name}" />
+						<apex:column headerValue="Email">
+							<a href="javascript:void(0);" id="{!con.Email}" onclick="copyMailId(this.id);">
+							 	{!con.Email} 
+							 </a>
+						</apex:column>
+					</apex:pageBlockTable>
+				</apex:pageBlock>
+			</div>	
+		</div>
+	</apex:outputPanel>
+<!-- |||| end of send email block |||| -->      
+    </apex:form>
+ </div>    
+   <apex:outputPanel id="uploadPnl" rendered="{!uploadDoc}" styleClass="grey_overlay">
+       <center><div id="mainContent">
+           <form action="https://s3-ap-southeast-1.amazonaws.com/{!awsKeySet.Name}"  method="post" 
+                   enctype="multipart/form-data" id="uploadForm">
+               <input type="hidden"  name="key"  id="key" /> 
+               <input type="hidden" name="AWSAccessKeyId" value="{!awsKeySet.AWS_AccessKey_Id__c}" /> 
+               <input type="hidden"  name="policy" value="{!policy}" /> 
+               <input type="hidden"  name="signature" value="{!signedPolicy}" /> 
+               <input type="hidden"  name="acl" value="{!acessType}" /> 
+               <input type="hidden"  name="Content-Type" value="{!contentType}" /> 
+               <input type="hidden" name="success_action_redirect" value="{!forRedirect}" id="forRedirect" />
+       		 
+       		<table>
+       		    <tr>
+       		        <td></td>
+       		        <td>
+       		            <input type="file" name="file" id="file" />
+       		        </td>
+       		      </tr>
+       		      <tr>
+       		        <th>
+       		            Description
+       		        </th>
+       		        <td>
+       		            <textarea rows="4" cols="50" maxlength="255" id="description" />
+       		        </td>
+       		    </tr>
+       		</table> 
+       		<div id="fileName"></div>
+       	    <div id="fileSize"></div>
+       	    <div id="fileType"></div>
+       	    
+       	    <div class="row">
+                 <input type="submit" value="Upload"  id="btn_submit" class="btn"
+                 		style="color:#0000FF;padding:7px;font-size:105%;"/>
+                 <input type="button" value="Cancel"  onclick="cancelUpload();" 
+                 		style="color:#0000FF;padding:7px;font-size:105%;" class="btn"/>
+               </div>
+              <div id="progressNumber"></div>
+           </form> 
+       </div></center>
+       <script>
+   	  	$(document).ready(function () { 
+		    var _requestBucket;
+			$("#btn_submit").click(function(event){
+				//alert(1);
+		 	    	event.preventDefault();
+		  		  var _file;
+		  
+		  		_file = $("#file").val().replace(/.+[\\\/]/, "");
+		       
+		        while( _file.indexOf('_') > -1  )
+		        {
+		        	_file = _file.replace('_',''); 
+		        }
+		        console.log('_file'+_file);
+		        $("#key").val(_file);
+		        var file = document.getElementById('file');
+		        console.log(file.files[0]);
+		        var size = file.files[0].size;
+		        var type = file.files[0].type;
+		        localStorage.setItem("size", size);
+		        localStorage.setItem("type", type);
+		        localStorage.setItem("description", $('#description').val());
+			   $("#uploadForm").submit();			 
+		    });   
+ 		 });
+ 		 
+   </script>
+   </apex:outputPanel>
+</apex:page>

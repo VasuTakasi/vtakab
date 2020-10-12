@@ -1,0 +1,13 @@
+<apex:page controller="SendSMSController" sidebar="false">
+	<apex:sectionHeader title="Send SMS" />
+	<apex:form >
+		<apex:pageMessages />
+		<apex:pageBlock >
+			<apex:pageBlockSection >
+				<apex:inputTextArea value="{!message}" />
+			</apex:pageBlockSection>
+			<apex:commandButton value="Send SMS" action="{!sendSMS}" />
+			<apex:commandButton value="Cancel"  />
+		</apex:pageBlock>
+	</apex:form>	
+</apex:page>

@@ -1,0 +1,12 @@
+<apex:page controller="AWS_Upload">
+    <apex:form >
+    	<apex:pageblock >
+        	<apex:inputText value="{!fileName}" />
+            <apex:commandButton action="{!generateUrl}" value="Go"/>
+        </apex:pageblock>
+        <apex:outputText >
+            {!'https://s3-ap-southeast-1.amazonaws.com/biznussoft/tt.txt?Expires='+TEXT(expires)+'
+            &AWSAccessKeyId=AKIAI726C5DGTQH7UGNA&Signature='+SignedPolicy}
+        </apex:outputText>
+    </apex:form>
+</apex:page>

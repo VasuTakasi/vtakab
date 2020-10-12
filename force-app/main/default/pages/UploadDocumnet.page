@@ -1,0 +1,57 @@
+<apex:page controller="AWS_Upload">
+	 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <div id ="mainContent">
+     <form action="https://s3-ap-southeast-1.amazonaws.com/{!awsKeySet.Name}"  method="post" enctype="multipart/form-data" id="uploadForm">
+        <input type="hidden"  name="key"  id="key" /> 
+        <input type="hidden" name="AWSAccessKeyId" value="" id="AWSAccessKeyId" /> 
+        <input type="hidden"  name="policy" value="{!policy}" /> 
+        <input type="hidden"  name="signature" value="{!signedPolicy}" /> 
+        <input type="hidden"  name="acl" value="{!acessType}" /> 
+        <input type="hidden"  name="Content-Type" value="{!Content_Type}" /> 
+        <input type="hidden" name="success_action_redirect" value="{!ForRedirect}" />
+		 
+		<h4 class="fileToUpload">Select a File to Upload in AWS</h4><br />
+		<div class="row">
+    		  <input type="file" size="50" name="file" id="file" onchange="fileSelected();" />
+    	</div>
+		
+		<div id="fileName"></div>
+	    <div id="fileSize"></div>
+	    <div id="fileType"></div>
+	    
+	    <div class="row">
+          <input type="button" value="Upload" id="btn_submit" onclick="getMyKey();"/>
+        </div>
+       <div id="progressNumber"></div>
+       
+       <script>
+		function getMyKey()
+		{
+			AWS_Upload.getAccessKey(
+             function(result,event)
+		     {
+                  if (event.status) 
+                  {
+					console.log(result);
+					document.getElementById('AWSAccessKeyId').value = result;
+					//event.preventDefault();
+			  		  var _file;
+			  
+			  		_file = $("#file").val().replace(/.+[\\\/]/, "");
+			        
+			       // console.log('_file'+_file);
+			        $("#key").val(_file);
+					document.getElementById("uploadForm").submit();
+                  } 
+                  else if (event.type === 'exception') {
+                      alert('Something wrong happened' );
+                  } 
+                  else {
+                     alert('Something wrong happened' );
+                  } 
+		 })
+	 }
+	</script>
+    </form> 
+    </div> 
+</apex:page>
